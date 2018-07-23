@@ -42,7 +42,7 @@ public class Properties {
 			while(scanner.hasNextLine()) {
 				line = scanner.nextLine();
                 String[] arr = line.split("=");
-                if (StringUtils.isNullOrEmpty(arr[0])) {
+                if (!StringUtils.isNullOrEmpty(arr[0])) {
                 	properties.put(arr[0], (StringUtils.isNullOrEmpty(arr[1]) ? "" : arr[1]));
                 }
             }
