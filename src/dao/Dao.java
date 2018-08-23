@@ -20,31 +20,31 @@ public class Dao {
 	private static void setParam(PreparedStatement pre, String classTypeName, int index, Field tmp, Object e) throws IllegalArgumentException, IllegalAccessException, SQLException {
 		switch(classTypeName) {
 		case "java.lang.String": 
-			pre.setString(index, tmp.get(e).toString());
+			pre.setString(index, (String)tmp.get(e));
 			break;
 		case "java.lang.Boolean": 
-			pre.setBoolean(index, tmp.getBoolean(e));
+			pre.setBoolean(index, (Boolean)tmp.get(e));
 			break;
 		case "java.math.BigDecimal": 
 			pre.setBigDecimal(index, new BigDecimal(tmp.get(e).toString()));
 			break;
 		case "java.lang.Byte": 
-			pre.setByte(index, tmp.getByte(e));
+			pre.setByte(index, (Byte)tmp.get(e));
 			break;
 		case "java.lang.Short": 
-			pre.setShort(index, tmp.getShort(e));
+			pre.setShort(index, (Short)tmp.get(e));
 			break;
 		case "java.lang.Integer": 
-			pre.setInt(index, tmp.getInt(e));
+			pre.setInt(index, (Integer)tmp.get(e));
 			break;
 		case "java.lang.Long": 
-			pre.setLong(index, tmp.getLong(e));
+			pre.setLong(index, (Long)tmp.get(e));
 			break;
 		case "java.lang.Float": 
-			pre.setFloat(index, tmp.getFloat(e));
+			pre.setFloat(index, (Float)tmp.get(e));
 			break;
 		case "java.lang.Double": 
-			pre.setDouble(index, tmp.getDouble(e));
+			pre.setDouble(index, (Double)tmp.get(e));
 			break;
 		case "[Ljava.lang.Byte;": 
 			pre.setBytes(index, (byte[])tmp.get(e));
@@ -89,6 +89,48 @@ public class Dao {
 				setParam(pre, tmp.getType().getName(), index, tmp, e);
 				index++;
 			}
+			pre.executeUpdate();
+		} catch (IllegalArgumentException | IllegalAccessException | SQLException e1) {
+			e1.printStackTrace();
+		}
+	}
+	
+	public static void update(Entity e, Connection conn) {
+		try {
+			PreparedStatement pre = conn.prepareStatement(SqlString.updateSql(e));
+			int index = 1;
+			Long idValue = -1l;
+			for (int i = 0; i< e.getClass().getDeclaredFields().length; i++){
+				Field tmp = e.getClass().getDeclaredFields()[i];
+				tmp.setAccessible(true);
+				if (tmp.getName().equalsIgnoreCase("id")) {
+					idValue = (Long)tmp.get(e);
+					continue;
+				}
+				setParam(pre, tmp.getType().getName(), index, tmp, e);
+				index++;
+			}
+			pre.setLong(index, idValue); /** Set Id in Where Clause */
+			pre.executeUpdate();
+		} catch (IllegalArgumentException | IllegalAccessException | SQLException e1) {
+			e1.printStackTrace();
+		}
+	}
+	
+	public static void delete(Entity e, Connection conn) {
+		try {
+			PreparedStatement pre = conn.prepareStatement(SqlString.deleteSql(e));
+			int index = 1;
+			Long idValue = -1l;
+			for (int i = 0; i< e.getClass().getDeclaredFields().length; i++){
+				Field tmp = e.getClass().getDeclaredFields()[i];
+				tmp.setAccessible(true);
+				if (tmp.getName().equalsIgnoreCase("id")) {
+					idValue = (Long)tmp.get(e);
+					break;
+				}
+			}
+			pre.setLong(index, idValue); /** Set Id in Where Clause */
 			pre.executeUpdate();
 		} catch (IllegalArgumentException | IllegalAccessException | SQLException e1) {
 			e1.printStackTrace();

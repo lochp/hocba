@@ -22,7 +22,8 @@ public class TestSqlString {
 		TestTable e = new TestTable();
 		e.setHarbor("Harbor");
 		e.setVase("vase");
-		e.setPaddle("paddle");
+		e.setPaddle("Cái mái chèo!");
+		e.setId(1l);
 		Connection conn = DbConnection.getSingleInstance().getConnection(true);
 		Dao.insert(e, conn);
 	}
