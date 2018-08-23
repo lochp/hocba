@@ -16,7 +16,7 @@ import dao.Dao;
 import databaseControl.DbConnection;
 import entity.TestTable;
 
-public class TestSqlString {
+public class TestDao {
 
 	public static void main(String[] args) throws IllegalArgumentException, IllegalAccessException, ClassNotFoundException, SQLException {
 		TestTable e = new TestTable();
