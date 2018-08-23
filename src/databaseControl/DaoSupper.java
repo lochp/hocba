@@ -69,6 +69,7 @@ public class DaoSupper {
 					case String.class.getName():
 						break;
 					}
+				}
 				
 			}
 			pstmt.executeUpdate(sql);

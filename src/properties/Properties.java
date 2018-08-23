@@ -28,7 +28,7 @@ public class Properties {
 	private Map<String, String> properties = new HashMap<String, String>();
 	
 	private List<String> fileList = new ArrayList<String>();
-
+	
 	private void pushFile() {
 		fileList.add("DbConfigInfo.properties");
 	}
