@@ -28,15 +28,17 @@ public class TestDao {
 		e.setId(1l);
 		Connection conn = DbConnection.getSingleInstance().getConnection(true);
 		TestTable t = (TestTable) Dao.findById(TestTable.class, 4l, conn);
-		System.out.println(t);
+//		System.out.println(t);
 		t.setPaddle("New Paddle");
 		Dao.update(t, conn);
 		t = (TestTable) Dao.findById(TestTable.class, 4l, conn);
-		System.out.println(t);
+//		System.out.println(t);
 		@SuppressWarnings("unchecked")
-		List<TestTable> lst = Dao.select(TestTable.class, "select id id, cang harbor, lohoa vase, maicheo paddle from testTable where id >= ? and maicheo=?", Arrays.asList(3l, "New Paddle"), conn);
+		List<TestTable> lst1 = Dao.select(selectObject.class, "select id id, cang harbor, lohoa vase, maicheo paddle from testTable where id >= ? and lohoa=?", Arrays.asList(3l, "Vase"), conn);
+		System.out.println(lst1);
+		List<TestTable> lst = Dao.select(TestTable.class, "select * from testtable where id >= ? and cang=?", Arrays.asList(3l, "Harbor"), conn);
 		for (int i=0; i< lst.size(); i++) {
-			System.out.println(lst.get(i).getId());
+			System.out.println(lst.get(i));
 		}
 	}
 	

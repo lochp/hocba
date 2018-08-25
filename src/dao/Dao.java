@@ -334,6 +334,9 @@ public class Dao {
 				}
 			}
 			ResultSet rs = pre.executeQuery();
+			if (EntityRelationTableMapping.tableNameMap.get(clazz.getName()) != null) {
+				return (List)getListEntityFromResultSet(clazz, rs);
+			}
 			return (List)getListFromResultSet(clazz, rs);
 		} catch (IllegalArgumentException | InstantiationException | IllegalAccessException | SQLException e) {
 			e.printStackTrace();
