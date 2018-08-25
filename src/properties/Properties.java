@@ -31,6 +31,7 @@ public class Properties {
 	
 	private void pushFile() {
 		fileList.add("DbConfigInfo.properties");
+		fileList.add("AppProperties.properties");
 	}
 	
 	private void parseProperties() {

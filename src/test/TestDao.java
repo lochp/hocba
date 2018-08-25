@@ -25,7 +25,8 @@ public class TestDao {
 		e.setPaddle("Cái mái chèo!");
 		e.setId(1l);
 		Connection conn = DbConnection.getSingleInstance().getConnection(true);
-		Dao.insert(e, conn);
+		TestTable t = (TestTable) Dao.findById(TestTable.class, 3l, conn);
+		System.out.println(t);
 	}
 	
 	private static void test_string() {

@@ -23,6 +23,7 @@ public class SqlString {
 			if (i < e.getClass().getDeclaredFields().length - 1){
 				_fieldName.append(", ");
 			}
+			tmp.setAccessible(false);
 		}
 		reval.append(_fieldName.toString());
 		reval.append(" ) VALUES ( ");
@@ -54,6 +55,7 @@ public class SqlString {
 			if (i < e.getClass().getDeclaredFields().length - 1){
 				_fieldName.append(", ");
 			}
+			tmp.setAccessible(false);
 		}
 		reval.append(_fieldName.toString());
 		reval.append(" WHERE id = ?");
@@ -63,6 +65,15 @@ public class SqlString {
 	public static String deleteSql(Entity e) {
 		StringBuilder reval = new StringBuilder();
 		reval.append("DELETE FROM ");
+		reval.append(EntityRelationTableMapping.tableNameMap.get(e.getClass().getName()));
+		reval.append(" WHERE id = ? ");
+		return reval.toString();
+	}
+	
+	public static String findByIdSql(Entity e) {
+		StringBuilder reval = new StringBuilder();
+		reval.append("SELECT * ");
+		reval.append("FROM ");
 		reval.append(EntityRelationTableMapping.tableNameMap.get(e.getClass().getName()));
 		reval.append(" WHERE id = ? ");
 		return reval.toString();

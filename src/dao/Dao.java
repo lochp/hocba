@@ -9,71 +9,232 @@ import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Ref;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 import databaseControl.Entity;
+import databaseControl.EntityRelationTableMapping;
 
 public class Dao {
 	
-	private static void setParam(PreparedStatement pre, String classTypeName, int index, Field tmp, Object e) throws IllegalArgumentException, IllegalAccessException, SQLException {
+	public static String getEntityColName(Entity entity, Field field) {
+		if (field.getName().equalsIgnoreCase("id")) {
+			return "id";
+		}
+		return EntityRelationTableMapping.tableFieldNameMap.get(entity.getClass().getName()).get(field.getName());
+	}
+	
+	public static void setFieldValueFromResultSet(Object targetObject, Field field, String colName, ResultSet rs) throws IllegalArgumentException, IllegalAccessException, SQLException {
+		String classTypeName = field.getType().getName();
 		switch(classTypeName) {
 		case "java.lang.String": 
-			pre.setString(index, (String)tmp.get(e));
+			field.set(targetObject, rs.getString(colName));
 			break;
 		case "java.lang.Boolean": 
-			pre.setBoolean(index, (Boolean)tmp.get(e));
+			field.set(targetObject, rs.getBoolean(colName));
 			break;
 		case "java.math.BigDecimal": 
-			pre.setBigDecimal(index, new BigDecimal(tmp.get(e).toString()));
+			field.set(targetObject, rs.getBigDecimal(colName));
 			break;
 		case "java.lang.Byte": 
-			pre.setByte(index, (Byte)tmp.get(e));
+			field.set(targetObject, rs.getByte(colName));
 			break;
 		case "java.lang.Short": 
-			pre.setShort(index, (Short)tmp.get(e));
+			field.set(targetObject, rs.getShort(colName));
 			break;
 		case "java.lang.Integer": 
-			pre.setInt(index, (Integer)tmp.get(e));
+			field.set(targetObject, rs.getInt(colName));
 			break;
 		case "java.lang.Long": 
-			pre.setLong(index, (Long)tmp.get(e));
+			field.set(targetObject, rs.getLong(colName));
 			break;
 		case "java.lang.Float": 
-			pre.setFloat(index, (Float)tmp.get(e));
+			field.set(targetObject, rs.getFloat(colName));
 			break;
 		case "java.lang.Double": 
-			pre.setDouble(index, (Double)tmp.get(e));
+			field.set(targetObject, rs.getDouble(colName));
 			break;
 		case "[Ljava.lang.Byte;": 
-			pre.setBytes(index, (byte[])tmp.get(e));
+			field.set(targetObject, rs.getByte(colName));
 			break;
 		case "java.sql.Date": 
-			pre.setDate(index, (Date)tmp.get(e));
+			field.set(targetObject, rs.getDate(colName));
 			break;
 		case "java.sql.Time": 
-			pre.setTime(index, (Time)tmp.get(e));
+			field.set(targetObject, rs.getTime(colName));
 			break;
 		case "java.sql.Timestamp": 
-			pre.setTimestamp(index, (Timestamp)tmp.get(e));
+			field.set(targetObject, rs.getTimestamp(colName));
 			break;
 		case "java.sql.Clob": 
-			pre.setClob(index, (Clob)tmp.get(e));
+			field.set(targetObject, rs.getClob(colName));
 			break;
 		case "java.sql.Blob": 
-			pre.setBlob(index, (Blob)tmp.get(e));
+			field.set(targetObject, rs.getBlob(colName));
 			break;
 		case "java.sql.Array": 
-			pre.setArray(index, (Array)tmp.get(e));
+			field.set(targetObject, rs.getArray(colName));
 			break;
 		case "java.sql.Ref": 
-			pre.setRef(index, (Ref)tmp.get(e));
+			field.set(targetObject, rs.getRef(colName));
 			break;
 		case "java.sql.Struct": 
 			/**no supporting for setting struct*/
 			break;
+		}
 	}
+	
+	public static List<Object> getListFromResultSet(Class<?> clazz, ResultSet rs) throws SQLException, InstantiationException, IllegalAccessException{
+		List<Object> reval = new ArrayList<Object>();
+		while( rs.next()) {
+			Object o = clazz.newInstance();
+			for(int i = 0, size = o.getClass().getDeclaredFields().length; i< size; i++) {
+				Field field = o.getClass().getDeclaredFields()[i];
+				field.setAccessible(true);
+				setFieldValueFromResultSet(o, field, field.getName(), rs);
+				field.setAccessible(false);
+			}
+			reval.add(o);
+		}
+		return reval;
+	}
+	
+	public static List<Entity> getListEntityFromResultSet(Class<?> entityClazz, ResultSet rs) throws SQLException, InstantiationException, IllegalAccessException{
+		List<Entity> reval = new ArrayList<Entity>();
+		while( rs.next()) {
+			Entity entity = (Entity) entityClazz.newInstance();
+			for(int i = 0, size = entity.getClass().getDeclaredFields().length; i< size; i++) {
+				Field field = entity.getClass().getDeclaredFields()[i];
+				field.setAccessible(true);
+				setFieldValueFromResultSet(entity, field, getEntityColName(entity, field), rs);
+				field.setAccessible(false);
+			}
+			reval.add(entity);
+		}
+		return reval;
+	}
+	
+	public static void setParamFromObject(PreparedStatement pre, String classTypeName, int index, Field field, Object originObject) throws IllegalArgumentException, IllegalAccessException, SQLException {
+		switch(classTypeName) {
+			case "java.lang.String": 
+				pre.setString(index, (String)field.get(originObject));
+				break;
+			case "java.lang.Boolean": 
+				pre.setBoolean(index, (Boolean)field.get(originObject));
+				break;
+			case "java.math.BigDecimal": 
+				pre.setBigDecimal(index, new BigDecimal(field.get(originObject).toString()));
+				break;
+			case "java.lang.Byte": 
+				pre.setByte(index, (Byte)field.get(originObject));
+				break;
+			case "java.lang.Short": 
+				pre.setShort(index, (Short)field.get(originObject));
+				break;
+			case "java.lang.Integer": 
+				pre.setInt(index, (Integer)field.get(originObject));
+				break;
+			case "java.lang.Long": 
+				pre.setLong(index, (Long)field.get(originObject));
+				break;
+			case "java.lang.Float": 
+				pre.setFloat(index, (Float)field.get(originObject));
+				break;
+			case "java.lang.Double": 
+				pre.setDouble(index, (Double)field.get(originObject));
+				break;
+			case "[Ljava.lang.Byte;": 
+				pre.setBytes(index, (byte[])field.get(originObject));
+				break;
+			case "java.sql.Date": 
+				pre.setDate(index, (Date)field.get(originObject));
+				break;
+			case "java.sql.Time": 
+				pre.setTime(index, (Time)field.get(originObject));
+				break;
+			case "java.sql.Timestamp": 
+				pre.setTimestamp(index, (Timestamp)field.get(originObject));
+				break;
+			case "java.sql.Clob": 
+				pre.setClob(index, (Clob)field.get(originObject));
+				break;
+			case "java.sql.Blob": 
+				pre.setBlob(index, (Blob)field.get(originObject));
+				break;
+			case "java.sql.Array": 
+				pre.setArray(index, (Array)field.get(originObject));
+				break;
+			case "java.sql.Ref": 
+				pre.setRef(index, (Ref)field.get(originObject));
+				break;
+			case "java.sql.Struct": 
+				/**no supporting for setting struct*/
+				break;
+		}
+	}
+	
+	public static void setParamFromFilter(PreparedStatement pre, int index, Object filter) throws IllegalArgumentException, IllegalAccessException, SQLException {
+		String classTypeName = filter.getClass().getTypeName();
+		switch(classTypeName) {
+			case "java.lang.String": 
+				pre.setString(index, (String)(filter));
+				break;
+			case "java.lang.Boolean": 
+				pre.setBoolean(index, (Boolean)(filter));
+				break;
+			case "java.math.BigDecimal": 
+				pre.setBigDecimal(index, new BigDecimal((filter).toString()));
+				break;
+			case "java.lang.Byte": 
+				pre.setByte(index, (Byte)(filter));
+				break;
+			case "java.lang.Short": 
+				pre.setShort(index, (Short)(filter));
+				break;
+			case "java.lang.Integer": 
+				pre.setInt(index, (Integer)(filter));
+				break;
+			case "java.lang.Long": 
+				pre.setLong(index, (Long)(filter));
+				break;
+			case "java.lang.Float": 
+				pre.setFloat(index, (Float)(filter));
+				break;
+			case "java.lang.Double": 
+				pre.setDouble(index, (Double)(filter));
+				break;
+			case "[Ljava.lang.Byte;": 
+				pre.setBytes(index, (byte[])(filter));
+				break;
+			case "java.sql.Date": 
+				pre.setDate(index, (Date)(filter));
+				break;
+			case "java.sql.Time": 
+				pre.setTime(index, (Time)(filter));
+				break;
+			case "java.sql.Timestamp": 
+				pre.setTimestamp(index, (Timestamp)(filter));
+				break;
+			case "java.sql.Clob": 
+				pre.setClob(index, (Clob)(filter));
+				break;
+			case "java.sql.Blob": 
+				pre.setBlob(index, (Blob)(filter));
+				break;
+			case "java.sql.Array": 
+				pre.setArray(index, (Array)(filter));
+				break;
+			case "java.sql.Ref": 
+				pre.setRef(index, (Ref)(filter));
+				break;
+			case "java.sql.Struct": 
+				/**no supporting for setting struct*/
+				break;
+		}
 	}
 	
 	public static void insert(Entity e, Connection conn) {
@@ -86,7 +247,7 @@ public class Dao {
 					continue;
 				}
 				tmp.setAccessible(true);
-				setParam(pre, tmp.getType().getName(), index, tmp, e);
+				setParamFromObject(pre, tmp.getType().getName(), index, tmp, e);
 				index++;
 			}
 			pre.executeUpdate();
@@ -107,7 +268,7 @@ public class Dao {
 					idValue = (Long)tmp.get(e);
 					continue;
 				}
-				setParam(pre, tmp.getType().getName(), index, tmp, e);
+				setParamFromObject(pre, tmp.getType().getName(), index, tmp, e);
 				index++;
 			}
 			pre.setLong(index, idValue); /** Set Id in Where Clause */
@@ -126,7 +287,9 @@ public class Dao {
 				Field tmp = e.getClass().getDeclaredFields()[i];
 				tmp.setAccessible(true);
 				if (tmp.getName().equalsIgnoreCase("id")) {
-					idValue = (Long)tmp.get(e);
+					if (tmp.get(e) != null) {
+						idValue = (Long)tmp.get(e);
+					}
 					break;
 				}
 			}
@@ -135,6 +298,26 @@ public class Dao {
 		} catch (IllegalArgumentException | IllegalAccessException | SQLException e1) {
 			e1.printStackTrace();
 		}
+	}
+	
+	public static Entity findById(Class<?> clazz, Long id, Connection conn) {
+		try {
+			if (id != null) {
+				Entity e = (Entity) clazz.newInstance();
+				PreparedStatement pre = conn.prepareStatement(SqlString.findByIdSql(e));
+				int index = 1;
+				Long idValue = id;
+				pre.setLong(index, idValue); /** Set Id in Where Clause */
+				ResultSet rs = pre.executeQuery();
+				List<?> lst = getListEntityFromResultSet(clazz, rs);
+				if (lst.size() > 0) {
+					return (Entity) lst.get(0);
+				}
+			}
+		} catch (IllegalArgumentException | InstantiationException | IllegalAccessException | SQLException e1) {
+			e1.printStackTrace();
+		}
+		return null;
 	}
 	
 }
