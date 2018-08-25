@@ -22,10 +22,11 @@ import databaseControl.EntityRelationTableMapping;
 public class Dao {
 	
 	public static String getEntityColName(Entity entity, Field field) {
-		if (field.getName().equalsIgnoreCase("id")) {
+		String colName = EntityRelationTableMapping.tableFieldNameMap.get(entity.getClass().getName()).get(field.getName());
+		if (colName == null && field.getName().equalsIgnoreCase("id")) {
 			return "id";
 		}
-		return EntityRelationTableMapping.tableFieldNameMap.get(entity.getClass().getName()).get(field.getName());
+		return colName;
 	}
 	
 	public static void setFieldValueFromResultSet(Object targetObject, Field field, String colName, ResultSet rs) throws IllegalArgumentException, IllegalAccessException, SQLException {

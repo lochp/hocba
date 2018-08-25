@@ -30,7 +30,7 @@ public class EntityRelationTableMapping {
 	
 	static {
 		Map<String, String> testTableMap = new HashMap<String, String>();
-		testTableMap.put("harbor", "Cang");
+		testTableMap.put("harbor", "cang");
 		testTableMap.put("vase", "LoHoa");
 		testTableMap.put("paddle", "MaiCheo");
 		tableFieldNameMap.put(TestTable.class.getName(), testTableMap);

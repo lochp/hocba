@@ -25,7 +25,11 @@ public class TestDao {
 		e.setPaddle("Cái mái chèo!");
 		e.setId(1l);
 		Connection conn = DbConnection.getSingleInstance().getConnection(true);
-		TestTable t = (TestTable) Dao.findById(TestTable.class, 3l, conn);
+		TestTable t = (TestTable) Dao.findById(TestTable.class, 4l, conn);
+		System.out.println(t);
+		t.setPaddle("New Paddle");
+		Dao.update(t, conn);
+		t = (TestTable) Dao.findById(TestTable.class, 4l, conn);
 		System.out.println(t);
 	}
 	
