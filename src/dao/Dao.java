@@ -321,4 +321,24 @@ public class Dao {
 		return null;
 	}
 	
+	@SuppressWarnings("rawtypes")
+	public static List select(Class<?> clazz, String sql, List<Object> filters, Connection conn) {
+		try {
+			PreparedStatement pre = conn.prepareStatement(sql);
+			if (filters != null && filters.size() > 0) {
+				int index = 1;
+				for (int i=0, size = filters.size(); i< size; i++) {
+					Object filter = filters.get(i);
+					setParamFromFilter(pre, index, filter);
+					index++;
+				}
+			}
+			ResultSet rs = pre.executeQuery();
+			return (List)getListFromResultSet(clazz, rs);
+		} catch (IllegalArgumentException | InstantiationException | IllegalAccessException | SQLException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 }
