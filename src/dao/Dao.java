@@ -244,10 +244,10 @@ public class Dao {
 			int index = 1;
 			for (int i = 0; i< e.getClass().getDeclaredFields().length; i++){
 				Field tmp = e.getClass().getDeclaredFields()[i];
-				if (tmp.getName().equalsIgnoreCase("id")) {
+				tmp.setAccessible(true);
+				if (tmp.getName().equalsIgnoreCase("id") || tmp.get(e) == null) {
 					continue;
 				}
-				tmp.setAccessible(true);
 				setParamFromObject(pre, tmp.getType().getName(), index, tmp, e);
 				index++;
 			}
@@ -266,7 +266,7 @@ public class Dao {
 				Field tmp = e.getClass().getDeclaredFields()[i];
 				tmp.setAccessible(true);
 				if (tmp.getName().equalsIgnoreCase("id")) {
-					idValue = (Long)tmp.get(e);
+					idValue = tmp.getName().equalsIgnoreCase("id") ? (Long)tmp.get(e) : idValue;
 					continue;
 				}
 				setParamFromObject(pre, tmp.getType().getName(), index, tmp, e);
@@ -279,7 +279,7 @@ public class Dao {
 		}
 	}
 	
-	public static void delete(Entity e, Connection conn) {
+	public static Integer delete(Entity e, Connection conn) {
 		try {
 			PreparedStatement pre = conn.prepareStatement(SqlString.deleteSql(e));
 			int index = 1;
@@ -295,10 +295,11 @@ public class Dao {
 				}
 			}
 			pre.setLong(index, idValue); /** Set Id in Where Clause */
-			pre.executeUpdate();
+			return pre.executeUpdate();
 		} catch (IllegalArgumentException | IllegalAccessException | SQLException e1) {
 			e1.printStackTrace();
 		}
+		return 0;
 	}
 	
 	public static Entity findById(Class<?> clazz, Long id, Connection conn) {
@@ -342,6 +343,24 @@ public class Dao {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public static Integer execute(String sql, List<Object> filters, Connection conn) {
+		try {
+			PreparedStatement pre = conn.prepareStatement(sql);
+			if (filters != null && filters.size() > 0) {
+				int index = 1;
+				for (int i=0, size = filters.size(); i< size; i++) {
+					Object filter = filters.get(i);
+					setParamFromFilter(pre, index, filter);
+					index++;
+				}
+			}
+			return pre.executeUpdate();
+		} catch (IllegalArgumentException | IllegalAccessException | SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
 	}
 	
 }

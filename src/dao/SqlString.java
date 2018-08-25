@@ -15,10 +15,10 @@ public class SqlString {
 		StringBuilder _fieldName = new StringBuilder();
 		for (int i = 0; i< e.getClass().getDeclaredFields().length; i++){
 			Field tmp = e.getClass().getDeclaredFields()[i];
-			if (tmp.getName().equalsIgnoreCase("id")) {
+			tmp.setAccessible(true);
+			if (tmp.getName().equalsIgnoreCase("id") || tmp.get(e) == null) {
 				continue;
 			}
-			tmp.setAccessible(true);
 			_fieldName.append(EntityRelationTableMapping.tableFieldNameMap.get(e.getClass().getName()).get(tmp.getName()));
 			if (i < e.getClass().getDeclaredFields().length - 1){
 				_fieldName.append(", ");
@@ -29,16 +29,18 @@ public class SqlString {
 		reval.append(" ) VALUES ( ");
 		for(int i=0, size = e.getClass().getDeclaredFields().length; i< size; i++) {
 			Field tmp = e.getClass().getDeclaredFields()[i];
-			if (tmp.getName().equalsIgnoreCase("id")) {
+			tmp.setAccessible(true);
+			if (tmp.getName().equalsIgnoreCase("id") || tmp.get(e) == null) {
 				continue;
 			}
+			tmp.setAccessible(false);
 			reval.append(i == size - 1? "? ": "?, ");
 		}
 		reval.append(")");
 		return reval.toString();
 	}
 	
-	public static String updateSql(Entity e) {
+	public static String updateSql(Entity e) throws IllegalArgumentException, IllegalAccessException {
 		StringBuilder reval= new StringBuilder();
 		reval.append("UPDATE ");
 		reval.append(EntityRelationTableMapping.tableNameMap.get(e.getClass().getName()));
@@ -46,10 +48,10 @@ public class SqlString {
 		StringBuilder _fieldName = new StringBuilder();
 		for (int i = 0; i< e.getClass().getDeclaredFields().length; i++){
 			Field tmp = e.getClass().getDeclaredFields()[i];
+			tmp.setAccessible(true);
 			if (tmp.getName().equalsIgnoreCase("id")) {
 				continue;
 			}
-			tmp.setAccessible(true);
 			_fieldName.append(EntityRelationTableMapping.tableFieldNameMap.get(e.getClass().getName()).get(tmp.getName()));
 			_fieldName.append(" = ?");
 			if (i < e.getClass().getDeclaredFields().length - 1){

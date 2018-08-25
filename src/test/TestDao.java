@@ -22,13 +22,15 @@ public class TestDao {
 
 	public static void main(String[] args) throws IllegalArgumentException, IllegalAccessException, ClassNotFoundException, SQLException {
 		TestTable e = new TestTable();
-		e.setHarbor("Harbor");
-		e.setVase("vase");
-		e.setPaddle("Cái mái chèo!");
-		e.setId(1l);
+		e.setHarbor(null);
+		e.setVase("vase 2");
+		e.setPaddle("Cái mái chèo! 2");
+//		e.setId(1l);
 		Connection conn = DbConnection.getSingleInstance().getConnection(true);
+		Dao.insert(e, conn);
 		TestTable t = (TestTable) Dao.findById(TestTable.class, 4l, conn);
-//		System.out.println(t);
+		t.setId(2l);
+		t.setHarbor(null);
 		t.setPaddle("New Paddle");
 		Dao.update(t, conn);
 		t = (TestTable) Dao.findById(TestTable.class, 4l, conn);
@@ -40,6 +42,8 @@ public class TestDao {
 		for (int i=0; i< lst.size(); i++) {
 			System.out.println(lst.get(i));
 		}
+		
+		System.out.println(Dao.execute("delete from testtable where id = ? ", Arrays.asList(3l), conn));;
 	}
 	
 	private static void test_string() {
