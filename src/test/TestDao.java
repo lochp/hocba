@@ -34,7 +34,7 @@ public class TestDao {
 		t = (TestTable) Dao.findById(TestTable.class, 4l, conn);
 		System.out.println(t);
 		@SuppressWarnings("unchecked")
-		List<TestTable> lst = Dao.select(TestTable.class, "select id id, cang harbor, lohoa vase, maicheo paddle from testTable where id >= ?", Arrays.asList(3l), conn);
+		List<TestTable> lst = Dao.select(TestTable.class, "select id id, cang harbor, lohoa vase, maicheo paddle from testTable where id >= ? and maicheo=?", Arrays.asList(3l, "New Paddle"), conn);
 		for (int i=0; i< lst.size(); i++) {
 			System.out.println(lst.get(i).getId());
 		}
