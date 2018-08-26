@@ -22,28 +22,28 @@ public class TestDao {
 
 	public static void main(String[] args) throws IllegalArgumentException, IllegalAccessException, ClassNotFoundException, SQLException {
 		TestTable e = new TestTable();
-		e.setHarbor(null);
+		e.setHarbor("Cang ca vung tau");
 		e.setVase("vase 2");
 		e.setPaddle("Cái mái chèo! 2");
 //		e.setId(1l);
 		Connection conn = DbConnection.getSingleInstance().getConnection(true);
 		Dao.insert(e, conn);
 		TestTable t = (TestTable) Dao.findById(TestTable.class, 4l, conn);
-		t.setId(2l);
-		t.setHarbor(null);
+		t.setId(4l);
+		t.setHarbor("New Habor");
 		t.setPaddle("New Paddle");
 		Dao.update(t, conn);
 		t = (TestTable) Dao.findById(TestTable.class, 4l, conn);
 //		System.out.println(t);
 		@SuppressWarnings("unchecked")
-		List<TestTable> lst1 = Dao.select(selectObject.class, "select id id, cang harbor, lohoa vase, maicheo paddle from testTable where id >= ? and lohoa=?", Arrays.asList(3l, "Vase"), conn);
+		List<TestTable> lst1 = Dao.select(selectObject.class, "select id id, cang harbor, lohoa vase, maicheo paddle from testTable where id >= ?", Arrays.asList(3l), conn);
 		System.out.println(lst1);
-		List<TestTable> lst = Dao.select(TestTable.class, "select * from testtable where id >= ? and cang=?", Arrays.asList(3l, "Harbor"), conn);
+		List<TestTable> lst = Dao.select(TestTable.class, "select * from testtable where id >= ? and lohoa=?", Arrays.asList(3l, "vase 2"), conn);
 		for (int i=0; i< lst.size(); i++) {
 			System.out.println(lst.get(i));
 		}
 		
-		System.out.println(Dao.execute("delete from testtable where id = ? ", Arrays.asList(3l), conn));;
+		System.out.println(Dao.execute("delete from testtable where id = ? ", Arrays.asList(11l), conn));;
 	}
 	
 	private static void test_string() {

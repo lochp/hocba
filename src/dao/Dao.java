@@ -252,12 +252,13 @@ public class Dao {
 				index++;
 			}
 			pre.executeUpdate();
+			pre.close();
 		} catch (IllegalArgumentException | IllegalAccessException | SQLException e1) {
 			e1.printStackTrace();
 		}
 	}
 	
-	public static void update(Entity e, Connection conn) {
+	public static int update(Entity e, Connection conn) {
 		try {
 			PreparedStatement pre = conn.prepareStatement(SqlString.updateSql(e));
 			int index = 1;
@@ -266,20 +267,23 @@ public class Dao {
 				Field tmp = e.getClass().getDeclaredFields()[i];
 				tmp.setAccessible(true);
 				if (tmp.getName().equalsIgnoreCase("id")) {
-					idValue = tmp.getName().equalsIgnoreCase("id") ? (Long)tmp.get(e) : idValue;
+					idValue = (Long)tmp.get(e);
 					continue;
 				}
 				setParamFromObject(pre, tmp.getType().getName(), index, tmp, e);
 				index++;
 			}
 			pre.setLong(index, idValue); /** Set Id in Where Clause */
-			pre.executeUpdate();
+			int numUpdatedRows = pre.executeUpdate();
+			pre.close();
+			return numUpdatedRows;
 		} catch (IllegalArgumentException | IllegalAccessException | SQLException e1) {
 			e1.printStackTrace();
 		}
+		return 0;
 	}
 	
-	public static Integer delete(Entity e, Connection conn) {
+	public static int delete(Entity e, Connection conn) {
 		try {
 			PreparedStatement pre = conn.prepareStatement(SqlString.deleteSql(e));
 			int index = 1;
@@ -295,7 +299,9 @@ public class Dao {
 				}
 			}
 			pre.setLong(index, idValue); /** Set Id in Where Clause */
-			return pre.executeUpdate();
+			int numUpdatedRows =  pre.executeUpdate();
+			pre.close();
+			return numUpdatedRows;
 		} catch (IllegalArgumentException | IllegalAccessException | SQLException e1) {
 			e1.printStackTrace();
 		}
@@ -312,6 +318,8 @@ public class Dao {
 				pre.setLong(index, idValue); /** Set Id in Where Clause */
 				ResultSet rs = pre.executeQuery();
 				List<?> lst = getListEntityFromResultSet(clazz, rs);
+				rs.close();
+				pre.close();
 				if (lst.size() > 0) {
 					return (Entity) lst.get(0);
 				}
@@ -335,10 +343,15 @@ public class Dao {
 				}
 			}
 			ResultSet rs = pre.executeQuery();
+			List reval = null;
 			if (EntityRelationTableMapping.tableNameMap.get(clazz.getName()) != null) {
-				return (List)getListEntityFromResultSet(clazz, rs);
+				reval = (List)getListEntityFromResultSet(clazz, rs);
+			} else {
+				reval = (List)getListFromResultSet(clazz, rs);
 			}
-			return (List)getListFromResultSet(clazz, rs);
+			rs.close();
+			pre.close();
+			return reval;
 		} catch (IllegalArgumentException | InstantiationException | IllegalAccessException | SQLException e) {
 			e.printStackTrace();
 		}
@@ -356,7 +369,9 @@ public class Dao {
 					index++;
 				}
 			}
-			return pre.executeUpdate();
+			int numUpdatedRows = pre.executeUpdate();
+			pre.close();
+			return numUpdatedRows;
 		} catch (IllegalArgumentException | IllegalAccessException | SQLException e) {
 			e.printStackTrace();
 		}
